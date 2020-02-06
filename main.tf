@@ -13,6 +13,14 @@ resource "azurerm_resource_group" "resg" {
   tags = "${var.tags}"
 }
 
+#Generate random number for server name:
+resource "random_string" "random" {
+  length = 8
+  special = true
+  override_special = "/@£$"
+}
+
+
 resource "azurerm_virtual_network" "myterraformnetwork" {
   name = "terraform_vnet"
   address_space = ["10.0.0.0/16"]
@@ -34,7 +42,7 @@ resource "azurerm_public_ip" "myterraformpublicip" {
 resource "azurerm_network_security_group" "myterraformnsg" {
     name                = "myNetworkSecurityGroup"
     location            = "eastus"
-    resource_group_name = azurerm_resource_group.resg.name
+    resource_group_name = azurerm_resource_group..name
     
     security_rule {
         name                       = "SSH"
@@ -79,14 +87,6 @@ resource "azurerm_network_interface" "myterraformnic" {
 }
 
 
-resource "random_id" "randomId" {
-    keepers = {
-        # Generate a new ID only when a new resource group is defined
-        resource_group = azurerm_resource_group.resg.name
-    }
-    
-    byte_length = 8
-}
 
 resource "azurerm_storage_account" "mystorageaccount" {
     name                        = "diag${random_id.randomId.hex}"
@@ -112,7 +112,7 @@ resource azurerm_managed_disk "os_disk" {
 }
 
 resource "azurerm_virtual_machine" "myterraformvm" {
-    name                  = "myVM"
+    name                  = "${random_string.random}_terraform"
     location              = "eastus"
     resource_group_name   = azurerm_resource_group.resg.name
     network_interface_ids = [azurerm_network_interface.myterraformnic.id]
@@ -128,8 +128,9 @@ resource "azurerm_virtual_machine" "myterraformvm" {
     }
 
 /*    os_profile {
-        computer_name  = "myvm"
+        computer_name  = "${random_string.random}_terraform"
         admin_username = "nick"
+	#Make sure to change the below if you actually want to use it properly...
 	admin_password = "xxxxx"
     }
 
