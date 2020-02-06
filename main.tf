@@ -130,7 +130,7 @@ resource "azurerm_virtual_machine" "myterraformvm" {
 /*    os_profile {
         computer_name  = "myvm"
         admin_username = "nick"
-	admin_password = "Fattycakes1"
+	admin_password = "xxxxx"
     }
 
     os_profile_linux_config {
